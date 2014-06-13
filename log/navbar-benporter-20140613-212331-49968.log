@@ -1,0 +1,7 @@
+Error in parse(text = lines, srcfile = srcfile, keep.source = TRUE) : 
+  /home/benporter/ShinyApps/navbar/server.R:27:18: unexpected string constant
+26:                  "Rock Hill High School" = "RockHillHighSchool"
+27:                  "Northwestern High School"
+                     ^
+Calls: runApp -> startAppDir -> sys.source -> parse
+Execution halted
