@@ -1,0 +1,7 @@
+Error in parse(text = lines, srcfile = srcfile, keep.source = TRUE) : 
+  /home/benporter/ShinyApps/navbar/server.R:56:60: unexpected ','
+55:     
+56:     checkboxInput("American Indian","AmericanIndian", TRUE),
+                                                               ^
+Calls: runApp -> startAppDir -> sys.source -> parse
+Execution halted

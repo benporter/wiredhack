@@ -1,0 +1,7 @@
+Error in parse(text = lines, srcfile = srcfile, keep.source = TRUE) : 
+  /home/benporter/ShinyApps/navbar/server.R:127:5: unexpected symbol
+126:     zipDF <- subset(zipDF,Zip != c("","00000")
+127:     zipDF
+         ^
+Calls: runApp -> startAppDir -> sys.source -> parse
+Execution halted

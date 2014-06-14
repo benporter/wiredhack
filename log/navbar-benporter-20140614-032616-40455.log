@@ -1,0 +1,16 @@
+Loading required package: gsubfn
+Loading required package: proto
+Warning in fun(libname, pkgname) :
+  no DISPLAY variable so Tk is not available
+Loading required package: RSQLite
+Loading required package: DBI
+Loading required package: RSQLite.extfuns
+Loading required package: gridExtra
+Loading required package: grid
+Loading required package: tcltk
+
+Listening on http://127.0.0.1:40455
+Warning in validateSelected(selected, choices, inputId) :
+  'selected' must be the values instead of names of 'choices' for the input 'HSpick'
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.

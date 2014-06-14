@@ -1,0 +1,7 @@
+Error in parse(text = lines, srcfile = srcfile, keep.source = TRUE) : 
+  /home/benporter/ShinyApps/navbar/server.R:128:5: unexpected symbol
+127:                               colorAxis="{colors:['#FFFFFF', '#0000FF']}")
+128:     return
+         ^
+Calls: runApp -> startAppDir -> sys.source -> parse
+Execution halted

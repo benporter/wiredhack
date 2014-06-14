@@ -1,7 +1,9 @@
 library(shiny)
-require(rCharts)
+#require(rCharts)
 library(sqldf)
 library(ggplot2)
+#library(googleVis)
+require(gridExtra)
 
 students <- read.csv("~/ShinyApps/WiredHack.csv")
 
@@ -29,16 +31,88 @@ HSmap <- data.frame("longname" = c("Out of State HS","Rock Hill High School","No
 # Define server logic required to generate and plot a random distribution
 shinyServer(function(input, output) {
   
-  #folder.chosen <- reactive({
-  #  if (input$inputmethod=="normal")
-  #  { return(substr(input$dataset, 1, regexpr("\\/",input$dataset)[1])) }
-  #  else { return(NULL) }
-  #})
+  df1 <- reactive({
+    df <- students
+    if (!input$male) {
+      df <- subset(students,!(Gender=="Male"))
+    }
+    
+    if (!input$female) {
+      df <- subset(students,!(Gender=="Female"))
+    }
+    return(df)
+  })
+  
+  df2 <- reactive({
+    df <- df1()
+    if (!input$AmericanIndian) {df <- subset(students,!(Gender=="Male"))}
+    if (!input$Asian) {df <- subset(students,!(Gender=="Male"))}
+    if (!input$Black) {df <- subset(students,!(Gender=="Male"))}
+    if (!input$Hispanic) {df <- subset(students,!(Gender=="Male"))}
+    if (!input$Morethanone) {df <- subset(students,!(Gender=="Male"))}
+    if (!input$NativeHawaiian) {df <- subset(students,!(Gender=="Male"))}
+    if (!input$Non-ResidentAlien) {df <- subset(students,!(Gender=="Male"))}
+    if (!input$Non-ResidentAlien) {df <- subset(students,!(Gender=="Male"))}
+    if (!input$Non-ResidentAlien) {df <- subset(students,!(Gender=="Male"))}
+    
+    #checkboxInput("American Indian","AmericanIndian", TRUE),
+    #checkboxInput("Asian","Asian", TRUE),
+    #checkboxInput("Black","Black", TRUE),
+    #checkboxInput("Hispanic", "Hispanic",TRUE),
+    #checkboxInput("More than one", "Morethanone",TRUE),
+    #checkboxInput("Native Hawaiian", "NativeHawaiian",TRUE),
+    #checkboxInput("Non-Resident Alien", "Non-ResidentAlien",TRUE),
+    #checkboxInput("Unknown", "Unknown",TRUE),
+    #checkboxInput("White", "White", TRUE) 
+    return(df)
+  })
   
   thechoice <- reactive({
     thepick <- subset(HSmap,shortname==input$HSpick)
     return(thepick)
   })
+  
+  output$distPlot <- renderPlot({
+    df <- df1()
+    
+    
+    
+    g1 <- ggplot(df, aes(RegistrationStatus),stat="bin") 
+    g1 <- g1 + geom_bar(fill="#FFCC99", colour="gray")
+    g1 <- g1 + ggtitle(paste("Registration Status"))
+    g1 <- g1 + xlab("") + ylab("Number of Students")
+    g1 <- g1 + coord_flip()
+    
+    
+    g2 <- ggplot(df, aes(EnrollmentStatus),stat="bin") 
+    g2 <- g2 + geom_bar(fill="#0066CC", colour="#0066CC")
+    g2 <- g2 + ggtitle(paste("Enrollment Status"))
+    g2 <- g2 + xlab("") + ylab("Number of Students")
+    
+    g3 <- ggplot(df, aes(x=Age))
+    g3 <- g3 + geom_histogram(binwidth = 1)
+    g3 <- g3 + geom_bar(fill="#006633", colour="gray")
+    g3 <- g3 + ggtitle(paste("Age Histogram"))
+    
+    #Program
+    
+    #hist(students$Age)
+    #hist(students$Gender)
+    #hist(students$RaceText)
+    #boxplot(data=students,formula=Age ~ Gender)
+    
+    print(grid.arrange(g1, g2, g3,ncol=2))
+  })
+  
+  output$distPlot2 <- renderPlot({
+    df <- df1()
+    g <- ggplot(df, aes(EnrollmentStatus),stat="bin") + geom_bar()
+    g <- g + ggtitle(paste("Enrollment Status"))
+    p <- p + xlab("") + ylab("Number of Students")
+    print(g)
+  })
+    
+  
   
   output$debug <- renderText({
     #print(thechoice()$longname)
@@ -51,60 +125,8 @@ shinyServer(function(input, output) {
   })
   
   
-  
-  
-
-  HSProgram <- reactive({
-    HSProgram <-sqldf("select HighSchool, Program, count(*) as count
-                       from students
-                      group by HighSchool, Program")
-  
-    #remove small values
-    HSProgram <- subset(HSProgram,count > 30)
-    colnames(HSProgram) <- c("source","target","value")
-    HSProgram$source <- as.character(HSProgram$source)
-    HSProgram$target <- as.character(HSProgram$target)
-    return(HSProgram)
-    
-  })
-  
-  #output$sankeyHSProgram <-  renderChart({ 
-  output$sankeyHSProgram <-  renderChart2({ 
-    sankeyPlot <- rCharts$new()
-    #sankeyPlot$setLib("http://timelyportfolio.github.io/rCharts_d3_sankey")
-    #sankeyPlot$setLib("/home/benporter/ShinyApps/sankey/libraries/widgets/d3_sankey/")
-    #sankeyPlot$setTemplate(afterScript = "<script></script>")
-    sankeyPlot$setLib('http://timelyportfolio.github.io/rCharts_d3_sankey')
-    sankeyPlot$setTemplate(script = "/home/benporter/ShinyApps/sankey/layouts/chart.html")
-        
-    sankeyPlot$set(data=HSProgram(),nodeWidth = 20,
-    #sankeyPlot$set(data=HSProgram,nodeWidth = 20,
-                 nodePadding = 5,
-                 layout = 32,
-                 width = 960,
-                 height = 500)
-    return(sankeyPlot)
-  })
-    
-  output$distPlot <- renderPlot({
-    
-    # generate an rnorm distribution and plot it
-    par(mfrow=c(1,2))
-    hist(students$Age)
-    #hist(students$Gender)
-    #hist(students$RaceText)
-    #boxplot(data=students,formula=Age ~ Gender)
-    
-  })
-  
-  output$rChart3 <- renderChart({
-     hair_eye_male <- subset(as.data.frame(HairEyeColor), Sex == "Male")
-     n1 <- nPlot(Freq ~ Hair, group = "Eye", data = hair_eye_male, type = "multiBarChart")
-     n1$print()
-  })
-  
-  
   output$dfExplorer = renderDataTable({
     students
+    dfEx <- subset(students,select=!(colnames(students) %in% c("X","StudentNumber")))
   })
 })
