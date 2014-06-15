@@ -129,33 +129,3 @@ output$probplot <- renderPlot({
   print(p)
   
 })
-
-#if (!input$AmericanIndian) {df <- subset(students,!(Gender=="Male"))}
-#if (!input$Asian) {df <- subset(students,!(Gender=="Male"))}
-#if (!input$Black) {df <- subset(students,!(Gender=="Male"))}
-#if (!input$Hispanic) {df <- subset(students,!(Gender=="Male"))}
-#if (!input$Morethanone) {df <- subset(students,!(Gender=="Male"))}
-#if (!input$NativeHawaiian) {df <- subset(students,!(Gender=="Male"))}
-#if (!input$Non-ResidentAlien) {df <- subset(students,!(Gender=="Male"))}
-#if (!input$Non-ResidentAlien) {df <- subset(students,!(Gender=="Male"))}
-#if (!input$Non-ResidentAlien) {df <- subset(students,!(Gender=="Male"))}
-
-#checkboxInput("American Indian","AmericanIndian", TRUE),
-#checkboxInput("Asian","Asian", TRUE),
-#checkboxInput("Black","Black", TRUE),
-#checkboxInput("Hispanic", "Hispanic",TRUE),
-#checkboxInput("More than one", "Morethanone",TRUE),
-#checkboxInput("Native Hawaiian", "NativeHawaiian",TRUE),
-#checkboxInput("Non-Resident Alien", "Non-ResidentAlien",TRUE),
-#checkboxInput("Unknown", "Unknown",TRUE),
-#checkboxInput("White", "White", TRUE) 
-
-#checkboxInput("American Indian","AmericanIndian", TRUE),
-#checkboxInput("Asian","Asian", TRUE),
-#checkboxInput("Black","Black", TRUE),
-#checkboxInput("Hispanic", "Hispanic",TRUE),
-#checkboxInput("More than one", "Morethanone",TRUE),
-#checkboxInput("Native Hawaiian", "NativeHawaiian",TRUE),
-#checkboxInput("Non-Resident Alien", "Non-ResidentAlien",TRUE),
-#checkboxInput("Unknown", "Unknown",TRUE),
-#checkboxInput("White", "White", TRUE)  

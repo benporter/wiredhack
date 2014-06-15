@@ -1,78 +1,14 @@
 library(shiny)
-#require(rCharts)
 library(sqldf)
 library(ggplot2)
-#library(googleVis)
 require(gridExtra)
 library(ggmap)
 
-students <- read.csv("~/ShinyApps/WiredHack.csv")
+#require(rCharts)
+#library(googleVis)
 
-feederSchools <- sqldf("select HighSchool,count(*) as studentcount
-                       from students
-                       group by HighSchool
-                       order by studentcount desc
-                       limit 10")
+#load preprocessed data from proprocessing.R
 
-top10feeders <- sqldf("select s.*
-      from feederSchools fs left join
-      students s on 
-      fs.HighSchool = s.HighSchool")
-
-HSmap <- data.frame("longname" = c("All High Schools","Out of State HS","Rock Hill High School","Northwestern High School", 
-                    "York Comprehensive High School","Clover High School","Fort Mill High School",       
-                    "Lancaster County School","District Chester High School","South Pointe High School",     
-                    "Nation Ford High School"),
-                    "shortname" = c("AllHighSchools","OutofStateHS","RockHillHighSchool","NorthwesternHighSchool",
-                                  "YorkComprehensiveHighSchool","CloverHighSchool",
-                                  "FortMillHighSchool", "LancasterCountySchool",
-                                  "DistrictChesterHighSchool","SouthPointeHighSchool","NationFordHighSchool")
-                    )
-
-Racemap <- data.frame("longname" = c( "All Races","American Indian","Asian","Black","Hispanic","More than one",
-                                      "Native Hawaiian","Non-Resident Alien","Unknown","White"),
-                      "shortname" =c("AllRaces","AmericanIndian","Asian","Black","Hispanic","Morethanone","NativeHawaiian",
-                                     "Non-ResidentAlien","Unknown","White")
-                      )
-
-central_location <- "452 South Anderson Road, Rock Hill, South Carolina 29730"
-base_map_10 <- get_map(central_location ,zoom = 10)
-load(file="/home/benporter/ShinyApps/latlotstudent.Rdata") 
-
-##########################
-# Gender and Program Plot
-##########################
-GenderProgram <-sqldf("select Gender, Program, count(*) as count
-                       from students
-                      group by Gender, Program")
-TopPrograms <- sqldf("select Program, 
-                     count(*) as count
-                     from students
-                     group by Program
-                     order by count desc
-                     limit 20")
-GPTP <- sqldf("select gp.Gender,gp.Program,gp.count as gpcount,
-              tp.count as tpcount
-              from GenderProgram gp inner join
-              TopPrograms tp on 
-              gp.Program = tp.Program")
-
-GPTP$PercentofTotal <- GPTP$gpcount / GPTP$tpcount
-
-###############
-# Clustering 
-###############
-
-studentsPreClust <- students[,c("StudentNumber","Age","Gender")]
-studentsPreClust$PercentFemale <- ifelse(studentsPreClust$Gender == "Female",1,0)
-studentsPreClust$Gender <- NULL
-studentsPreClust$AgeNorm <- 3 * (studentsPreClust$Age - min(studentsPreClust$Age)) / (max(studentsPreClust$Age))
-studentsPreClust$Age <- NULL
-rownames(studentsPreClust) <- studentsPreClust$StudentNumber
-studentsPreClust$StudentNumber <- NULL
-clusteringModel <- kmeans(x=studentsPreClust,centers=6)
-clusterNum <- data.frame("clusterNum"=as.character(clusteringModel$cluster))
-studentsClust <- cbind(students,clusterNum)
 
 
 # Define server logic required to generate and plot a random distribution
@@ -91,16 +27,23 @@ shinyServer(function(input, output) {
   })
   
   clustFiltered <- reactive({
-    df <- sqldf(paste("select * from studentsClust where clusterNum in ('",as.character(input$cluster),"')",sep=""))
+    df <- sqldf(paste("select * from studentsClust where clusterNum in ('",input$cluster,"')",sep=""))
     return(df)
   })
   
   output$clustPlot <- renderPlot({
     df <- clustFiltered()
-    g <- ggplot(df, aes(Gender),stat="bin") + geom_bar()
-    g <- g + ggtitle(paste("Gender"))
-    p <- p + xlab("") + ylab("Number of Students")
-    print(g)
+    #g <- ggplot(df, aes(Gender),stat="bin") + geom_bar()
+    #g <- g + ggtitle(paste("Gender"))
+    #g <- g + xlab("") + ylab("Number of Students")
+    
+    g2 <- ggplot(df, aes(Gender),stat="bin") 
+    g2 <- g2 + geom_bar(fill="#0066CC", colour="#0066CC")
+    g2 <- g2 + ggtitle(paste("Gender"))
+    g2 <- g2 + xlab("") + ylab("Number of Students")
+    g2 <- g2 + theme(panel.background = element_rect(fill = "white"))
+    
+    print(g2)
   })
   
   
@@ -121,10 +64,8 @@ shinyServer(function(input, output) {
   })
   
   latlonStudentJitter <- reactive({
-     jitter <- input$jitter
+     jitter <- input$jitter # amount to shift
      df <- latlonStudent
-     #df$lon_num_rand <- df$lon_num + runif(n=nrow(latlonStudent),min=(-1*jitter),max=jitter)
-     #df$lat_num_rand <- df$lat_num + runif(n=nrow(latlonStudent),min=(-1*jitter),max=jitter)
      df$lon_num_rand <- df$lon_num + rnorm(n=nrow(latlonStudent),mean=0,sd=jitter)
      df$lat_num_rand <- df$lat_num + rnorm(n=nrow(latlonStudent),mean=0,sd=jitter)
     return(df) 
@@ -143,7 +84,6 @@ shinyServer(function(input, output) {
   output$map <- renderPlot({
      map <- ggmap(base_map_10,extent = "device",legend = "none") + geom_point(aes(x = lon_num_rand, y = lat_num_rand), colour = "blue", 
                                                                           data = HSsubset(), alpha = .20,size=2,na.rm=TRUE) 
-     #data = latlonStudent
      map <- map + theme(legend.position="none")
      print(map)
   })
@@ -157,8 +97,7 @@ shinyServer(function(input, output) {
     g1 <- g1 + xlab("") + ylab("Number of Students")
     g1 <- g1 + coord_flip()
     g1 <- g1 + theme(panel.background = element_rect(fill = "white"))
-    
-    
+        
     g2 <- ggplot(df, aes(EnrollmentStatus),stat="bin") 
     g2 <- g2 + geom_bar(fill="#0066CC", colour="#0066CC")
     g2 <- g2 + ggtitle(paste("Enrollment Status"))
@@ -167,7 +106,6 @@ shinyServer(function(input, output) {
     
     g3 <- ggplot(df, aes(x=Age))
     g3 <- g3 + geom_histogram(binwidth = 1,fill="#006666", colour="#006666")
-    #g3 <- g3 + geom_bar(fill="#006633", colour="#006633")
     g3 <- g3 + ggtitle(paste("Age Histogram"))
     g3 <- g3 + theme(panel.background = element_rect(fill = "white"))
     
@@ -189,13 +127,7 @@ shinyServer(function(input, output) {
     g4 <- g4 + coord_flip()
     g4 <- g4 + theme(panel.background = element_rect(fill = "white"))
     
-    #Program
-    
-    #hist(students$Age)
-    #hist(students$Gender)
-    #hist(students$RaceText)
-    #boxplot(data=students,formula=Age ~ Gender)
-    
+    # collapse charts into a 2 by 2 matrix
     print(grid.arrange(g1, g2, 
                        g3, g4, 
                        ncol=2))
@@ -211,28 +143,22 @@ shinyServer(function(input, output) {
     print(g5)
   })
   
-  output$distPlot2 <- renderPlot({
-    df <- df1()
-    g <- ggplot(df, aes(EnrollmentStatus),stat="bin") + geom_bar()
-    g <- g + ggtitle(paste("Enrollment Status"))
-    p <- p + xlab("") + ylab("Number of Students")
-    print(g)
+  output$dfExplorer = renderDataTable({
+    students
   })
-    
   
-  
+  # Debugging Output:  variable
   output$debug <- renderText({
     #print(thechoice()$longname)
-    print(paste("The choice is: ",thechoice()$shortname,sep=""))
+    print(paste("The cluster value is: ",input$cluster," with class ", class(input$cluster),sep=""))
   })
   
+  # Debugging Output: data table
   output$dfprint <- renderTable({
     #df <- sqldf(paste("select * from top10feeders  where HighSchool in ('",thechoice()$longname,"')",sep=""))
     df <- clustFiltered()
     head(df)
   })
   
-  output$dfExplorer = renderDataTable({
-    dfEx <- subset(students,select=!(colnames(students) %in% c("X","StudentNumber")))
-  })
+
 })

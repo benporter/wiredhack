@@ -1,12 +1,12 @@
 library(shiny)
-#library(rCharts)
 library(sqldf)
 library(ggplot2)
-#library(googleVis)
 require(gridExtra)
 library(ggmap)
 
+#require(rCharts)
 #options(RCHART_LIB = 'sankey')
+#library(googleVis)
 
 shinyUI(navbarPage("York Tech",
                    tabPanel("The Student Body",
@@ -30,7 +30,6 @@ shinyUI(navbarPage("York Tech",
                             ),
                               mainPanel(h3("Explore our student body"),
                                 plotOutput("distPlot")
-                                #,plotOutput("distPlot2")
                               )
                             ),
                    tabPanel("Map",
@@ -53,18 +52,11 @@ shinyUI(navbarPage("York Tech",
                               sliderInput("jitter", "Point Jitter:", 
                                           min = 0, max = 0.5, value = 0.05, step= 0.01)
                             ),
-                            mainPanel(#"York Tech Students"
-                            #,showOutput("map","leaflet"))
-                            #,htmlOutput("map")
-                            h4("Follow in their footsteps. Apply to York Technical College today!")
-                            ,plotOutput("map")
+                            mainPanel(
+                                h4("Follow in their footsteps. Apply to York Technical College today!"),
+                                plotOutput("map")
                             )
                    ),
-                   #tabPanel("High School",
-                  #          sidebarPanel(
-                  #            
-                  #         #,showOutput("rChart3", "nvd3")
-                  #         ),
                    tabPanel("Explorer",
                             h4("Find people like you:"),
                             dataTableOutput("dfExplorer")
@@ -84,12 +76,13 @@ shinyUI(navbarPage("York Tech",
                                         selected="1")
                            ),
                            mainPanel(
-                             h5("It is a homogenous set of students, but of distinct groups of people.")
+                             h5("It is not a homogenous set of students, but of distinct groups of people.")
                              ,plotOutput("clustPlot")
                            )
                   ),
-                  tabPanel("Debug",textOutput("debug"),
-                                    tableOutput("dfprint")
+                  tabPanel("Debug"
+                           ,textOutput("debug")
+                           ,tableOutput("dfprint")
                   )
 ))
 
